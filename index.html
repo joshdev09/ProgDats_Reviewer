@@ -2,27 +2,133 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Java Midterm Pro Quiz</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Midterm Pro Quiz (Mobile Friendly)</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; max-width: 850px; margin: 20px auto; padding: 20px; background-color: #eef2f3; }
-        .quiz-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .question { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
-        .code-block { background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; font-family: 'Courier New', Courier, monospace; margin: 10px 0; white-space: pre; }
+        :root {
+            --primary-color: #007bff;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #212529;
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            line-height: 1.5; 
+            margin: 0; 
+            padding: 10px; 
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .quiz-container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: var(--card-bg); 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+        }
+
+        h1 { font-size: 1.5rem; text-align: center; color: var(--primary-color); }
+        .description { text-align: center; font-size: 0.9rem; margin-bottom: 20px; color: #666; }
+
+        .question { 
+            margin-bottom: 25px; 
+            padding: 15px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+        }
+
+        .question h3 { margin-top: 0; font-size: 1.1rem; margin-bottom: 12px; }
+
+        .code-block { 
+            background: #272822; 
+            color: #f8f8f2; 
+            padding: 12px; 
+            border-radius: 6px; 
+            font-family: 'Courier New', monospace; 
+            font-size: 0.85rem;
+            overflow-x: auto;
+            margin: 10px 0;
+            white-space: pre;
+        }
+
         .options { list-style: none; padding: 0; }
-        .options li { margin: 8px 0; transition: 0.2s; }
-        button { background: #007bff; color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-size: 1.1em; }
-        button:hover { background: #0056b3; }
-        #result { margin-top: 25px; font-weight: bold; font-size: 1.3em; color: #2c3e50; }
+        
+        .options li { 
+            margin: 10px 0; 
+            padding: 12px;
+            background: #f1f3f5;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .options li:hover { background: #e9ecef; }
+
+        input[type="radio"] { 
+            margin-right: 15px; 
+            width: 20px; 
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        label { width: 100%; cursor: pointer; font-size: 1rem; }
+
+        .btn-container {
+            position: sticky;
+            bottom: 20px;
+            text-align: center;
+            padding-top: 10px;
+        }
+
+        button { 
+            background: var(--primary-color); 
+            color: white; 
+            border: none; 
+            padding: 15px 40px; 
+            border-radius: 30px; 
+            cursor: pointer; 
+            font-size: 1.1rem;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 300px;
+        }
+
+        #result { 
+            margin-top: 25px; 
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold; 
+            font-size: 1.2rem; 
+            display: none;
+            background: #d4edda;
+            color: #155724;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 600px) {
+            .quiz-container { padding: 15px; }
+            h1 { font-size: 1.25rem; }
+            .question h3 { font-size: 1rem; }
+        }
     </style>
 </head>
 <body>
 
 <div class="quiz-container">
-    <h1>Java Programming: Midterm Mastery</h1>
-    <p>Test your knowledge on Arrays, Strings, and Collections.</p>
+    <h1>Java Midterm Mastery</h1>
+    <p class="description">Covers Arrays, Strings, Lists, & Sets</p>
     <form id="quizForm">
         <div id="questionsContainer"></div>
-        <button type="button" onclick="submitQuiz()">Check My Score</button>
+        <div class="btn-container">
+            <button type="button" onclick="submitQuiz()">Submit Answers</button>
+        </div>
     </form>
     <div id="result"></div>
 </div>
@@ -30,46 +136,45 @@
 <script>
 const quizData = [
     // --- TRICKY CODE QUESTIONS ---
-    { q: "What is the output of this code snippet?<div class='code-block'>String s = \"Java\";\ns.concat(\" World\");\nSystem.out.println(s);</div>", a: ["Java World", "Java", "World", "Error"], c: 1 },
-    { q: "What will this print?<div class='code-block'>int[] arr = {1, 2, 3};\nint[] b = arr;\nb[0] = 9;\nSystem.out.println(arr[0]);</div>", a: ["1", "9", "0", "NullPointerException"], c: 1 },
-    { q: "What is the result of the following?<div class='code-block'>StringBuilder sb = new StringBuilder(\"ABC\");\nsb.reverse();\nsb.append(\"D\");\nSystem.out.println(sb);</div>", a: ["ABCD", "DCBA", "CBAD", "ABCDD"], c: 2 },
-    { q: "What does this print?<div class='code-block'>ArrayList&lt;String&gt; list = new ArrayList&lt;&gt;();\nlist.add(\"A\");\nlist.add(\"B\");\nlist.set(1, \"C\");\nSystem.out.println(list);</div>", a: ["[A, B, C]", "[A, C]", "[C, B]", "[A, B]"], c: 1 },
-    { q: "What is the output?<div class='code-block'>char ch = 'A';\nch++;\nSystem.out.println(ch);</div>", a: ["A", "65", "B", "66"], c: 2 },
-    { q: "What happens here?<div class='code-block'>Set&lt;Integer&gt; set = new HashSet&lt;&gt;();\nset.add(10);\nset.add(10);\nSystem.out.println(set.size());</div>", a: ["1", "2", "0", "Exception"], c: 0 },
-    { q: "What is the output?<div class='code-block'>String s1 = \"Hello\";\nString s2 = new String(\"Hello\");\nSystem.out.println(s1 == s2);</div>", a: ["true", "false"], c: 1 },
+    { q: "What is the output?<div class='code-block'>String s = \"Java\";\ns.concat(\" World\");\nSystem.out.println(s);</div>", a: ["Java World", "Java", "World", "Error"], c: 1, ref: "[cite: 25]" },
+    { q: "What will this print?<div class='code-block'>int[] arr = {1, 2, 3};\nint[] b = arr;\nb[0] = 9;\nSystem.out.println(arr[0]);</div>", a: ["1", "9", "0", "Reference Error"], c: 1, ref: "[cite: 16]" },
+    { q: "Result of the following:<div class='code-block'>StringBuilder sb = new StringBuilder(\"ABC\");\nsb.reverse();\nsb.append(\"D\");\nSystem.out.println(sb);</div>", a: ["ABCD", "DCBA", "CBAD", "ABCDD"], c: 2, ref: "[cite: 31]" },
+    { q: "What is printed?<div class='code-block'>ArrayList&lt;String&gt; list = new ArrayList&lt;&gt;();\nlist.add(\"A\");\nlist.add(\"B\");\nlist.set(1, \"C\");\nSystem.out.println(list);</div>", a: ["[A, B, C]", "[A, C]", "[C, B]", "[A, B]"], c: 1, ref: "[cite: 131]" },
+    { q: "What is the output?<div class='code-block'>char ch = 'A';\nch++;\nSystem.out.println(ch);</div>", a: ["A", "65", "B", "66"], c: 2, ref: "[cite: 21]" },
+    { q: "What happens here?<div class='code-block'>Set&lt;Integer&gt; set = new HashSet&lt;&gt;();\nset.add(10);\nset.add(10);\nSystem.out.println(set.size());</div>", a: ["1", "2", "0", "Exception"], c: 0, ref: "[cite: 230]" },
+    { q: "What is the output?<div class='code-block'>String s1 = \"Hello\";\nString s2 = new String(\"Hello\");\nSystem.out.println(s1 == s2);</div>", a: ["true", "false"], c: 1, ref: "[cite: 26, 28]" },
 
     // --- CONCEPTUAL QUESTIONS ---
-    { q: "Which property returns the size of an array?", a: ["size()", "length()", "length", "capacity"], c: 2 },
-    { q: "Where are arrays stored in Java memory?", a: ["Stack", "Heap", "String Pool", "Register"], c: 1 },
-    { q: "Default value for an 'int' array element?", a: ["null", "0.0", "0", "-1"], c: 2 },
-    { q: "Time complexity for a linear search in an array?", a: ["O(1)", "O(log n)", "O(n)", "O(n²)"], c: 2 },
-    { q: "Which class provides Character.isDigit()?", a: ["String", "Character", "Integer", "Scanner"], c: 1 },
-    { q: "Which symbol is used for character literals?", a: ["Double quotes", "Single quotes", "Backticks", "Parentheses"], c: 1 },
-    { q: "What makes StringBuilder better than String for modifications?", a: ["It is immutable", "It is mutable", "It uses the String Pool", "It uses less memory"], c: 1 },
-    { q: "The index of the first element in any array or list is always:", a: ["1", "0", "-1", "Depends on size"], c: 1 },
-    { q: "Which exception occurs if you access arr[5] in an array of size 5?", a: ["NullPointerException", "ArithmeticException", "ArrayIndexOutOfBoundsException", "NoSuchElementException"], c: 2 },
-    { q: "Which method is used to compare String contents?", a: ["==", "equals()", "compare()", "isSame()"], c: 1 },
-    { q: "What package contains the List and Set interfaces?", a: ["java.lang", "java.io", "java.util", "java.sql"], c: 2 },
-    { q: "A Set is a collection that allows:", a: ["Duplicates", "Unique elements only", "Ordered indices only", "Only integers"], c: 1 },
-    { q: "Which method removes all elements from a Collection?", a: ["removeAll()", "clear()", "empty()", "delete()"], c: 1 },
-    { q: "Which Set implementation maintains sorted order?", a: ["HashSet", "TreeSet", "LinkedHashSet", "ArraySet"], c: 1 },
-    { q: "How do you find the number of characters in a String?", a: ["str.length", "str.size()", "str.length()", "str.count"], c: 2 },
-    { q: "Which operation returns only common elements between two sets?", a: ["Union", "Difference", "Intersection", "Symmetric Difference"], c: 2 },
-    { q: "What is the return type of hasNext() in an Iterator?", a: ["int", "String", "boolean", "void"], c: 2 },
-    { q: "To add an element at the beginning of a List, use:", a: ["addLast()", "addFirst()", "push()", "insert()"], c: 1 },
-    { q: "Which method is used to sort an array?", a: ["Collections.sort()", "Arrays.sort()", "arr.sort()", "List.sort()"], c: 1 },
-    { q: "The size of a char in Java is:", a: ["8 bits", "16 bits", "32 bits", "64 bits"], c: 1 },
-    { q: "Which method adds all elements from one list to another?", a: ["add()", "addAll()", "appendAll()", "putAll()"], c: 1 },
-    { q: "True or False: An ArrayList can hold primitive types like int directly without wrapper classes.", a: ["True", "False"], c: 1 },
-    { q: "String literals are stored in the:", a: ["Heap", "String Pool", "Stack", "Method Area"], c: 1 },
-    { q: "Which method is used to get an object that can traverse a collection?", a: ["traverser()", "iterator()", "loop()", "next()"], c: 1 },
-    { q: "In a 2D array arr[2][3], the number 2 represents:", a: ["Columns", "Rows", "Total Size", "Index"], c: 1 },
-    { q: "What is the result of 'A' + 1?", a: ["B", "A1", "66", "Error"], c: 2 },
-    { q: "Which method removes a specific element from a Set?", a: ["delete()", "remove()", "discard()", "pop()"], c: 1 },
-    { q: "Can a Set accept a null value?", a: ["Yes", "No"], c: 0 }
+    { q: "Which property is used for array size?", a: ["size()", "length()", "length", "capacity"], c: 2, ref: "[cite: 7]" },
+    { q: "Where are arrays stored in memory?", a: ["Stack", "Heap", "String Pool", "Register"], c: 1, ref: "[cite: 2, 9]" },
+    { q: "Default value for 'double' array element?", a: ["0", "0.0", "null", "false"], c: 1, ref: "[cite: 6]" },
+    { q: "Search complexity in an array?", a: ["O(1)", "O(log n)", "O(n)", "O(n²)"], c: 2, ref: "[cite: 21]" },
+    { q: "Class providing isLetter() method?", a: ["String", "Character", "Integer", "Scanner"], c: 1, ref: "[cite: 22]" },
+    { q: "Character literal symbol?", a: ["Double quotes", "Single quotes", "Backticks", "Parentheses"], c: 1, ref: "[cite: 19, 20]" },
+    { q: "Why use StringBuilder for loops?", a: ["Immutability", "Faster modifications", "String Pool", "Type safety"], c: 1, ref: "[cite: 30, 31]" },
+    { q: "First index of an array?", a: ["1", "0", "-1", "Any"], c: 1, ref: "[cite: 2, 7]" },
+    { q: "Exception for invalid array index?", a: ["NullPointer", "Arithmetic", "ArrayIndexOutOfBounds", "Security"], c: 2, ref: "[cite: 9]" },
+    { q: "How to compare String content?", a: ["==", "equals()", "compare()", "isSame()"], c: 1, ref: "[cite: 26]" },
+    { q: "Package for Collections?", a: ["java.lang", "java.io", "java.util", "java.sql"], c: 2, ref: "[cite: 39]" },
+    { q: "A Set allows:", a: ["Duplicates", "Unique elements only", "Sorted indices only", "Only integers"], c: 1, ref: "[cite: 41, 176]" },
+    { q: "Method to wipe a Collection?", a: ["removeAll()", "clear()", "empty()", "delete()"], c: 1, ref: "[cite: 153, 245]" },
+    { q: "Sorted Set implementation?", a: ["HashSet", "TreeSet", "LinkedHashSet", "ArraySet"], c: 1, ref: "[cite: 180, 181]" },
+    { q: "Get number of String characters?", a: ["str.length", "str.size()", "str.length()", "str.count"], c: 2, ref: "[cite: 26]" },
+    { q: "Set 'Intersection' method?", a: ["addAll()", "removeAll()", "retainAll()", "containsAll()"], c: 2, ref: "[cite: 300]" },
+    { q: "Iterator 'hasNext()' returns:", a: ["int", "String", "boolean", "void"], c: 2, ref: "[cite: 78]" },
+    { q: "Add element to start of List?", a: ["addLast()", "addFirst()", "push()", "insert()"], c: 1, ref: "[cite: 159]" },
+    { q: "Array sorting utility?", a: ["Collections.sort()", "Arrays.sort()", "arr.sort()", "List.sort()"], c: 1, ref: "[cite: 17]" },
+    { q: "Size of char in Java?", a: ["8 bits", "16 bits", "32 bits", "64 bits"], c: 1, ref: "[cite: 20]" },
+    { q: "Copy list elements to another?", a: ["add()", "addAll()", "appendAll()", "putAll()"], c: 1, ref: "[cite: 62]" },
+    { q: "ArrayList size is:", a: ["Fixed", "Dynamic", "Static", "Manual"], c: 1, ref: "[cite: 83]" },
+    { q: "Literals share memory in the:", a: ["Heap", "String Pool", "Stack", "Method Area"], c: 1, ref: "[cite: 28]" },
+    { q: "Method to get a traversal object?", a: ["traverser()", "iterator()", "loop()", "next()"], c: 1, ref: "[cite: 73, 74]" },
+    { q: "A List is:", a: ["Unordered", "Ordered with duplicates", "Sorted only", "Primitive only"], c: 1, ref: "[cite: 43, 48]" },
+    { q: "Math result of 'A' + 0?", a: ["A", "65", "66", "Error"], c: 1, ref: "[cite: 21]" },
+    { q: "Retrieve element at index in List?", a: ["find()", "get()", "fetch()", "at()"], c: 1, ref: "[cite: 68, 110]" },
+    { q: "Can a Set accept null?", a: ["Yes", "No"], c: 0, ref: "[cite: 231]" }
 ];
 
-// Shuffle helper
 function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -85,7 +190,11 @@ function loadQuestions() {
         qDiv.className = 'question';
         qDiv.innerHTML = `<h3>${index + 1}. ${data.q}</h3>
             <ul class="options">
-                ${data.a.map((opt, i) => `<li><input type="radio" name="q${index}" value="${i}"> ${opt}</li>`).join('')}
+                ${data.a.map((opt, i) => `
+                    <li onclick="this.querySelector('input').checked = true">
+                        <input type="radio" name="q${index}" value="${i}" id="q${index}o${i}">
+                        <label for="q${index}o${i}">${opt}</label>
+                    </li>`).join('')}
             </ul>`;
         container.appendChild(qDiv);
     });
@@ -100,9 +209,10 @@ function submitQuiz() {
         }
     });
     const resultDiv = document.getElementById('result');
+    resultDiv.style.display = 'block';
     resultDiv.innerHTML = `Your Score: ${score} / ${quizData.length}`;
-    if (score === 35) resultDiv.innerHTML += " - Java Master! 🚀";
-    window.scrollTo(0, 0);
+    if (score === 35) resultDiv.innerHTML += "<br>🌟 Java Master Achievement Unlocked!";
+    window.scrollTo(0, document.body.scrollHeight);
 }
 
 loadQuestions();
