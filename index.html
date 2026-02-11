@@ -3,13 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Java Midterm Pro Quiz (Mobile Friendly)</title>
+    <title>Java Midterm Pro Quiz (With Reveal)</title>
     <style>
         :root {
             --primary-color: #007bff;
             --bg-color: #f8f9fa;
             --card-bg: #ffffff;
             --text-color: #212529;
+            --correct-bg: #d4edda;
+            --correct-border: #28a745;
+            --wrong-bg: #f8d7da;
+            --wrong-border: #dc3545;
         }
 
         body { 
@@ -30,7 +34,7 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
         }
 
-        h1 { font-size: 1.5rem; text-align: center; color: var(--primary-color); }
+        h1 { font-size: 1.5rem; text-align: center; color: var(--primary-color); margin-bottom: 5px;}
         .description { text-align: center; font-size: 0.9rem; margin-bottom: 20px; color: #666; }
 
         .question { 
@@ -38,6 +42,7 @@
             padding: 15px;
             border: 1px solid #e9ecef;
             border-radius: 8px;
+            transition: all 0.3s ease;
         }
 
         .question h3 { margin-top: 0; font-size: 1.1rem; margin-bottom: 12px; }
@@ -64,10 +69,19 @@
             display: flex;
             align-items: center;
             cursor: pointer;
-            transition: background 0.2s;
+            border: 2px solid transparent;
         }
 
-        .options li:hover { background: #e9ecef; }
+        /* Classes for revealing answers */
+        .options li.correct-reveal {
+            background-color: var(--correct-bg) !important;
+            border-color: var(--correct-border) !important;
+        }
+
+        .options li.wrong-reveal {
+            background-color: var(--wrong-bg) !important;
+            border-color: var(--wrong-border) !important;
+        }
 
         input[type="radio"] { 
             margin-right: 15px; 
@@ -79,9 +93,11 @@
         label { width: 100%; cursor: pointer; font-size: 1rem; }
 
         .btn-container {
+            position: sticky;
             bottom: 20px;
             text-align: center;
             padding-top: 10px;
+            z-index: 100;
         }
 
         button { 
@@ -93,10 +109,12 @@
             cursor: pointer; 
             font-size: 1.1rem;
             font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             width: 100%;
             max-width: 300px;
         }
+
+        button:disabled { background: #ccc; cursor: not-allowed; }
 
         #result { 
             margin-top: 25px; 
@@ -106,11 +124,11 @@
             font-weight: bold; 
             font-size: 1.2rem; 
             display: none;
-            background: #d4edda;
-            color: #155724;
+            background: #e7f3ff;
+            color: #004085;
+            border: 1px solid #b8daff;
         }
 
-        /* Responsive Adjustments */
         @media (max-width: 600px) {
             .quiz-container { padding: 15px; }
             h1 { font-size: 1.25rem; }
@@ -122,11 +140,11 @@
 
 <div class="quiz-container">
     <h1>Java Midterm Mastery</h1>
-    <p class="description">Covers Arrays, Strings, Lists, & Sets</p>
+    <p class="description">Reviewing Arrays, Strings, & Collections</p>
     <form id="quizForm">
         <div id="questionsContainer"></div>
         <div class="btn-container">
-            <button type="button" onclick="submitQuiz()">Submit Answers</button>
+            <button type="button" id="submitBtn" onclick="submitQuiz()">Submit & Reveal Answers</button>
         </div>
     </form>
     <div id="result"></div>
@@ -135,43 +153,43 @@
 <script>
 const quizData = [
     // --- TRICKY CODE QUESTIONS ---
-    { q: "What is the output?<div class='code-block'>String s = \"Java\";\ns.concat(\" World\");\nSystem.out.println(s);</div>", a: ["Java World", "Java", "World", "Error"], c: 1, ref: "[cite: 25]" },
-    { q: "What will this print?<div class='code-block'>int[] arr = {1, 2, 3};\nint[] b = arr;\nb[0] = 9;\nSystem.out.println(arr[0]);</div>", a: ["1", "9", "0", "Reference Error"], c: 1, ref: "[cite: 16]" },
-    { q: "Result of the following:<div class='code-block'>StringBuilder sb = new StringBuilder(\"ABC\");\nsb.reverse();\nsb.append(\"D\");\nSystem.out.println(sb);</div>", a: ["ABCD", "DCBA", "CBAD", "ABCDD"], c: 2, ref: "[cite: 31]" },
-    { q: "What is printed?<div class='code-block'>ArrayList&lt;String&gt; list = new ArrayList&lt;&gt;();\nlist.add(\"A\");\nlist.add(\"B\");\nlist.set(1, \"C\");\nSystem.out.println(list);</div>", a: ["[A, B, C]", "[A, C]", "[C, B]", "[A, B]"], c: 1, ref: "[cite: 131]" },
-    { q: "What is the output?<div class='code-block'>char ch = 'A';\nch++;\nSystem.out.println(ch);</div>", a: ["A", "65", "B", "66"], c: 2, ref: "[cite: 21]" },
-    { q: "What happens here?<div class='code-block'>Set&lt;Integer&gt; set = new HashSet&lt;&gt;();\nset.add(10);\nset.add(10);\nSystem.out.println(set.size());</div>", a: ["1", "2", "0", "Exception"], c: 0, ref: "[cite: 230]" },
-    { q: "What is the output?<div class='code-block'>String s1 = \"Hello\";\nString s2 = new String(\"Hello\");\nSystem.out.println(s1 == s2);</div>", a: ["true", "false"], c: 1, ref: "[cite: 26, 28]" },
+    { q: "What is the output?<div class='code-block'>String s = \"Java\";\ns.concat(\" World\");\nSystem.out.println(s);</div>", a: ["Java World", "Java", "World", "Error"], c: 1 },
+    { q: "What will this print?<div class='code-block'>int[] arr = {1, 2, 3};\nint[] b = arr;\nb[0] = 9;\nSystem.out.println(arr[0]);</div>", a: ["1", "9", "0", "Reference Error"], c: 1 },
+    { q: "Result of the following:<div class='code-block'>StringBuilder sb = new StringBuilder(\"ABC\");\nsb.reverse();\nsb.append(\"D\");\nSystem.out.println(sb);</div>", a: ["ABCD", "DCBA", "CBAD", "ABCDD"], c: 2 },
+    { q: "What is printed?<div class='code-block'>ArrayList&lt;String&gt; list = new ArrayList&lt;&gt;();\nlist.add(\"A\");\nlist.add(\"B\");\nlist.set(1, \"C\");\nSystem.out.println(list);</div>", a: ["[A, B, C]", "[A, C]", "[C, B]", "[A, B]"], c: 1 },
+    { q: "What is the output?<div class='code-block'>char ch = 'A';\nch++;\nSystem.out.println(ch);</div>", a: ["A", "65", "B", "66"], c: 2 },
+    { q: "What happens here?<div class='code-block'>Set&lt;Integer&gt; set = new HashSet&lt;&gt;();\nset.add(10);\nset.add(10);\nSystem.out.println(set.size());</div>", a: ["1", "2", "0", "Exception"], c: 0 },
+    { q: "What is the output?<div class='code-block'>String s1 = \"Hello\";\nString s2 = new String(\"Hello\");\nSystem.out.println(s1 == s2);</div>", a: ["true", "false"], c: 1 },
 
     // --- CONCEPTUAL QUESTIONS ---
-    { q: "Which property is used for array size?", a: ["size()", "length()", "length", "capacity"], c: 2, ref: "[cite: 7]" },
-    { q: "Where are arrays stored in memory?", a: ["Stack", "Heap", "String Pool", "Register"], c: 1, ref: "[cite: 2, 9]" },
-    { q: "Default value for 'double' array element?", a: ["0", "0.0", "null", "false"], c: 1, ref: "[cite: 6]" },
-    { q: "Search complexity in an array?", a: ["O(1)", "O(log n)", "O(n)", "O(n²)"], c: 2, ref: "[cite: 21]" },
-    { q: "Class providing isLetter() method?", a: ["String", "Character", "Integer", "Scanner"], c: 1, ref: "[cite: 22]" },
-    { q: "Character literal symbol?", a: ["Double quotes", "Single quotes", "Backticks", "Parentheses"], c: 1, ref: "[cite: 19, 20]" },
-    { q: "Why use StringBuilder for loops?", a: ["Immutability", "Faster modifications", "String Pool", "Type safety"], c: 1, ref: "[cite: 30, 31]" },
-    { q: "First index of an array?", a: ["1", "0", "-1", "Any"], c: 1, ref: "[cite: 2, 7]" },
-    { q: "Exception for invalid array index?", a: ["NullPointer", "Arithmetic", "ArrayIndexOutOfBounds", "Security"], c: 2, ref: "[cite: 9]" },
-    { q: "How to compare String content?", a: ["==", "equals()", "compare()", "isSame()"], c: 1, ref: "[cite: 26]" },
-    { q: "Package for Collections?", a: ["java.lang", "java.io", "java.util", "java.sql"], c: 2, ref: "[cite: 39]" },
-    { q: "A Set allows:", a: ["Duplicates", "Unique elements only", "Sorted indices only", "Only integers"], c: 1, ref: "[cite: 41, 176]" },
-    { q: "Method to wipe a Collection?", a: ["removeAll()", "clear()", "empty()", "delete()"], c: 1, ref: "[cite: 153, 245]" },
-    { q: "Sorted Set implementation?", a: ["HashSet", "TreeSet", "LinkedHashSet", "ArraySet"], c: 1, ref: "[cite: 180, 181]" },
-    { q: "Get number of String characters?", a: ["str.length", "str.size()", "str.length()", "str.count"], c: 2, ref: "[cite: 26]" },
-    { q: "Set 'Intersection' method?", a: ["addAll()", "removeAll()", "retainAll()", "containsAll()"], c: 2, ref: "[cite: 300]" },
-    { q: "Iterator 'hasNext()' returns:", a: ["int", "String", "boolean", "void"], c: 2, ref: "[cite: 78]" },
-    { q: "Add element to start of List?", a: ["addLast()", "addFirst()", "push()", "insert()"], c: 1, ref: "[cite: 159]" },
-    { q: "Array sorting utility?", a: ["Collections.sort()", "Arrays.sort()", "arr.sort()", "List.sort()"], c: 1, ref: "[cite: 17]" },
-    { q: "Size of char in Java?", a: ["8 bits", "16 bits", "32 bits", "64 bits"], c: 1, ref: "[cite: 20]" },
-    { q: "Copy list elements to another?", a: ["add()", "addAll()", "appendAll()", "putAll()"], c: 1, ref: "[cite: 62]" },
-    { q: "ArrayList size is:", a: ["Fixed", "Dynamic", "Static", "Manual"], c: 1, ref: "[cite: 83]" },
-    { q: "Literals share memory in the:", a: ["Heap", "String Pool", "Stack", "Method Area"], c: 1, ref: "[cite: 28]" },
-    { q: "Method to get a traversal object?", a: ["traverser()", "iterator()", "loop()", "next()"], c: 1, ref: "[cite: 73, 74]" },
-    { q: "A List is:", a: ["Unordered", "Ordered with duplicates", "Sorted only", "Primitive only"], c: 1, ref: "[cite: 43, 48]" },
-    { q: "Math result of 'A' + 0?", a: ["A", "65", "66", "Error"], c: 1, ref: "[cite: 21]" },
-    { q: "Retrieve element at index in List?", a: ["find()", "get()", "fetch()", "at()"], c: 1, ref: "[cite: 68, 110]" },
-    { q: "Can a Set accept null?", a: ["Yes", "No"], c: 0, ref: "[cite: 231]" }
+    { q: "Which property is used for array size?", a: ["size()", "length()", "length", "capacity"], c: 2 },
+    { q: "Where are arrays stored in memory?", a: ["Stack", "Heap", "String Pool", "Register"], c: 1 },
+    { q: "Default value for 'double' array element?", a: ["0", "0.0", "null", "false"], c: 1 },
+    { q: "Search complexity in an array?", a: ["O(1)", "O(log n)", "O(n)", "O(n²)"], c: 2 },
+    { q: "Class providing isLetter() method?", a: ["String", "Character", "Integer", "Scanner"], c: 1 },
+    { q: "Character literal symbol?", a: ["Double quotes", "Single quotes", "Backticks", "Parentheses"], c: 1 },
+    { q: "Why use StringBuilder for loops?", a: ["Immutability", "Faster modifications", "String Pool", "Type safety"], c: 1 },
+    { q: "First index of an array?", a: ["1", "0", "-1", "Any"], c: 1 },
+    { q: "Exception for invalid array index?", a: ["NullPointer", "Arithmetic", "ArrayIndexOutOfBounds", "Security"], c: 2 },
+    { q: "How to compare String content?", a: ["==", "equals()", "compare()", "isSame()"], c: 1 },
+    { q: "Package for Collections?", a: ["java.lang", "java.io", "java.util", "java.sql"], c: 2 },
+    { q: "A Set is a collection that allows:", a: ["Duplicates", "Unique elements only", "Ordered indices only", "Only integers"], c: 1 },
+    { q: "Method to wipe a Collection?", a: ["removeAll()", "clear()", "empty()", "delete()"], c: 1 },
+    { q: "Sorted Set implementation?", a: ["HashSet", "TreeSet", "LinkedHashSet", "ArraySet"], c: 1 },
+    { q: "Get number of String characters?", a: ["str.length", "str.size()", "str.length()", "str.count"], c: 2 },
+    { q: "Set 'Intersection' method?", a: ["addAll()", "removeAll()", "retainAll()", "containsAll()"], c: 2 },
+    { q: "Iterator 'hasNext()' returns:", a: ["int", "String", "boolean", "void"], c: 2 },
+    { q: "Add element to start of List?", a: ["addLast()", "addFirst()", "push()", "insert()"], c: 1 },
+    { q: "Array sorting utility?", a: ["Collections.sort()", "Arrays.sort()", "arr.sort()", "List.sort()"], c: 1 },
+    { q: "Size of char in Java?", a: ["8 bits", "16 bits", "32 bits", "64 bits"], c: 1 },
+    { q: "Copy list elements to another?", a: ["add()", "addAll()", "appendAll()", "putAll()"], c: 1 },
+    { q: "ArrayList size is:", a: ["Fixed", "Dynamic", "Static", "Manual"], c: 1 },
+    { q: "Literals share memory in the:", a: ["Heap", "String Pool", "Stack", "Method Area"], c: 1 },
+    { q: "Method to get a traversal object?", a: ["traverser()", "iterator()", "loop()", "next()"], c: 1 },
+    { q: "A List is:", a: ["Unordered", "Ordered with duplicates", "Sorted only", "Primitive only"], c: 1 },
+    { q: "Math result of 'A' + 0?", a: ["A", "65", "66", "Error"], c: 1 },
+    { q: "Retrieve element at index in List?", a: ["find()", "get()", "fetch()", "at()"], c: 1 },
+    { q: "Can a Set accept null?", a: ["Yes", "No"], c: 0 }
 ];
 
 function shuffle(array) {
@@ -187,31 +205,58 @@ function loadQuestions() {
     quizData.forEach((data, index) => {
         const qDiv = document.createElement('div');
         qDiv.className = 'question';
+        qDiv.id = `qBlock${index}`;
         qDiv.innerHTML = `<h3>${index + 1}. ${data.q}</h3>
             <ul class="options">
                 ${data.a.map((opt, i) => `
-                    <li onclick="this.querySelector('input').checked = true">
-                        <input type="radio" name="q${index}" value="${i}" id="q${index}o${i}">
-                        <label for="q${index}o${i}">${opt}</label>
+                    <li onclick="selectOption(${index}, ${i})" id="q${index}opt${i}">
+                        <input type="radio" name="q${index}" value="${i}" id="q${index}r${i}">
+                        <label for="q${index}r${i}">${opt}</label>
                     </li>`).join('')}
             </ul>`;
         container.appendChild(qDiv);
     });
 }
 
+function selectOption(qIdx, optIdx) {
+    // Only allow selection if button is not disabled (quiz not submitted)
+    if (!document.getElementById('submitBtn').disabled) {
+        document.getElementById(`q${qIdx}r${optIdx}`).checked = true;
+    }
+}
+
 function submitQuiz() {
     let score = 0;
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerText = "Submitted";
+
     quizData.forEach((data, index) => {
         const selected = document.querySelector(`input[name="q${index}"]:checked`);
-        if (selected && parseInt(selected.value) === data.c) {
-            score++;
+        const correctIdx = data.c;
+        
+        // Highlight the correct answer always
+        document.getElementById(`q${index}opt${correctIdx}`).classList.add('correct-reveal');
+
+        if (selected) {
+            const selectedIdx = parseInt(selected.value);
+            if (selectedIdx === correctIdx) {
+                score++;
+            } else {
+                // Highlight user's wrong choice
+                document.getElementById(`q${index}opt${selectedIdx}`).classList.add('wrong-reveal');
+            }
         }
+        
+        // Disable all radio buttons after submission
+        const radios = document.getElementsByName(`q${index}`);
+        radios.forEach(r => r.disabled = true);
     });
+
     const resultDiv = document.getElementById('result');
     resultDiv.style.display = 'block';
-    resultDiv.innerHTML = `Your Score: ${score} / ${quizData.length}`;
-    if (score === 35) resultDiv.innerHTML += "<br>🌟 Java Master Achievement Unlocked!";
-    window.scrollTo(0, document.body.scrollHeight);
+    resultDiv.innerHTML = `Review complete! Your Score: ${score} / ${quizData.length}<br>Correct answers are now highlighted in green.`;
+    window.scrollTo(0, 0);
 }
 
 loadQuestions();
