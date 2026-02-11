@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Midterm Quiz: Arrays, Strings, Lists & Sets</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 20px auto; padding: 20px; background-color: #f4f4f4; }
+        .quiz-container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .question { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .question h3 { margin-top: 0; font-size: 1.1em; color: #333; }
+        .options { list-style: none; padding: 0; }
+        .options li { margin: 5px 0; }
+        button { background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 1em; }
+        button:hover { background: #218838; }
+        #result { margin-top: 20px; font-weight: bold; font-size: 1.2em; color: #0056b3; }
+        .correct { color: green; }
+        .incorrect { color: red; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <h1>Java Programming Quiz</h1>
+    <p>Topics: Arrays, Strings, StringBuilder, Lists, and Sets</p>
+    <form id="quizForm">
+        <div id="questionsContainer"></div>
+        <button type="button" onclick="submitQuiz()">Submit Quiz</button>
+    </form>
+    <div id="result"></div>
+</div>
+
+<script>
+const quizData = [
+    // ARRAYS
+    { q: "Where are arrays stored in Java memory?", a: ["Stack", "Heap", "String Pool", "Method Area"], c: 1 },
+    { q: "What is the default value of a boolean array element?", a: ["true", "null", "false", "0"], c: 2 },
+    { q: "Which property is used to find the number of elements in an array?", a: ["length()", "size()", "length", "capacity"], c: 2 },
+    { q: "What is the time complexity for accessing an array element by index?", a: ["O(n)", "O(log n)", "O(1)", "O(n²)"], c: 2 },
+    { q: "Which exception is thrown when accessing index 5 of an array with size 5?", a: ["NullPointerException", "ArrayIndexOutOfBoundsException", "IllegalStateException", "InputMismatchException"], c: 1 },
+    { q: "How do you correctly copy array 'a' to 'b' so they don't share the same reference?", a: ["int[] b = a;", "int[] b = a.copy();", "Iterate through 'a' and assign each index to 'b'", "b = &a;"], c: 2 },
+    { q: "What is the index of the last element in an array named 'arr'?", a: ["arr.length", "arr.length + 1", "arr.length - 1", "0"], c: 2 },
+    { q: "Which package must be imported to use Arrays.sort()?", a: ["java.lang", "java.io", "java.util.Arrays", "java.util"], c: 3 },
+    { q: "True or False: An array can store different data types (e.g., int and String) simultaneously.", a: ["True", "False"], c: 1 },
+    { q: "What is the default value for a char array element?", a: ["' '", "'\\u0000'", "null", "0"], c: 1 },
+
+    // STRINGS & STRINGBUILDER
+    { q: "Which of the following describes String immutability?", a: ["Strings can be resized", "Strings cannot be changed after creation", "Strings are stored in the stack", "Strings use single quotes"], c: 1 },
+    { q: "Where are String literals stored?", a: ["Heap memory", "String Pool", "Stack", "External file"], c: 1 },
+    { q: "What is the correct way to compare the content of two Strings?", a: ["s1 == s2", "s1.equals(s2)", "s1.compare(s2)", "s1 = s2"], c: 1 },
+    { q: "Which class is preferred for heavy string modifications in a loop?", a: ["String", "Character", "StringBuilder", "StringBuffer"], c: 2 },
+    { q: "What is the time complexity of String concatenation (+) inside a loop of size n?", a: ["O(1)", "O(n)", "O(n²)", "O(log n)"], c: 2 },
+    { q: "How do you find the number of characters in a String?", a: ["str.length", "str.size()", "str.length()", "str.count()"], c: 2 },
+    { q: "Which StringBuilder method is used to reverse a sequence?", a: ["backwards()", "flip()", "reverse()", "opposite()"], c: 2 },
+    { q: "What is the size of a 'char' data type in Java?", a: ["1 byte", "2 bytes", "4 bytes", "8 bytes"], c: 1 },
+    { q: "Which method removes leading and trailing whitespace from a String?", a: ["clean()", "strip()", "trim()", "delete()"], c: 2 },
+    { q: "What does Character.isDigit('5') return?", a: ["'5'", "true", "false", "5"], c: 1 },
+
+    // LISTS
+    { q: "Which package contains the List interface?", a: ["java.lang", "java.util", "java.net", "java.list"], c: 1 },
+    { q: "Which of the following is TRUE about a List?", a: ["Unordered and unique", "Ordered and allows duplicates", "Ordered and unique", "Unordered and allows duplicates"], c: 1 },
+    { q: "Which method is used to retrieve an element at a specific index in an ArrayList?", a: ["retrieve(i)", "fetch(i)", "get(i)", "index(i)"], c: 2 },
+    { q: "How do you add an element to the end of a List?", a: ["list.push(x)", "list.insert(x)", "list.add(x)", "list.append(x)"], c: 2 },
+    { q: "Unlike arrays, an ArrayList is:", a: ["Fixed size", "Dynamic size", "Stored in stack", "Faster for access"], c: 1 },
+    { q: "Which method removes all elements from an ArrayList?", a: ["removeAll()", "delete()", "clear()", "empty()"], c: 2 },
+    { q: "What are the three methods of an Iterator object?", a: ["first(), next(), last()", "next(), hasNext(), remove()", "get(), set(), delete()", "add(), remove(), next()"], c: 1 },
+    { q: "Which method is used to update an existing element in an ArrayList?", a: ["add(index, value)", "update(index, value)", "set(index, value)", "replace(index, value)"], c: 2 },
+
+    // SETS
+    { q: "Which of the following is TRUE about a Set?", a: ["Allows duplicates", "Maintains insertion order", "Contains only unique elements", "Always sorted"], c: 2 },
+    { q: "Which Set implementation stores elements in a sorted order?", a: ["HashSet", "TreeSet", "LinkedHashSet", "ArraySet"], c: 1 },
+    { q: "What is the 'Union' operation in Sets?", a: ["Common elements only", "Elements in first but not second", "Combines all elements from both sets", "Removes all elements"], c: 2 },
+    { q: "Which method is used to perform an 'Intersection' in Java Sets?", a: ["addAll()", "removeAll()", "retainAll()", "containsAll()"], c: 2 },
+    { q: "How does a HashSet determine the storage order of elements?", a: ["Insertion order", "Alphabetical order", "Hashing algorithm", "Size of object"], c: 2 },
+    { q: "Does a Set accept null values?", a: ["Yes", "No"], c: 0 },
+    { q: "Which method is used to perform the 'Difference' operation (removing values of one set from another)?", a: ["minus()", "difference()", "removeAll()", "retainAll()"], c: 2 }
+];
+
+function loadQuestions() {
+    const container = document.getElementById('questionsContainer');
+    quizData.forEach((data, index) => {
+        const qDiv = document.createElement('div');
+        qDiv.className = 'question';
+        qDiv.innerHTML = `<h3>${index + 1}. ${data.q}</h3>
+            <ul class="options">
+                ${data.a.map((opt, i) => `<li><input type="radio" name="q${index}" value="${i}"> ${opt}</li>`).join('')}
+            </ul>`;
+        container.appendChild(qDiv);
+    });
+}
+
+function submitQuiz() {
+    let score = 0;
+    quizData.forEach((data, index) => {
+        const selected = document.querySelector(`input[name="q${index}"]:checked`);
+        if (selected && parseInt(selected.value) === data.c) {
+            score++;
+        }
+    });
+    const resultDiv = document.getElementById('result');
+    resultDiv.innerHTML = `Your Score: ${score} / ${quizData.length}`;
+    window.scrollTo(0, 0);
+}
+
+loadQuestions();
+</script>
+
+</body>
+</html>
